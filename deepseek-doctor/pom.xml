@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.2</version>
+        <version>3.3.8</version>
         <relativePath />
     </parent>
 
@@ -44,6 +44,29 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
         </dependency>
+
+        <!-- 引入SpringAI的坐标 -->
+        <dependency>
+            <groupId>io.springboot.ai</groupId>
+            <artifactId>spring-ai-ollama</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springboot.ai</groupId>
+            <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+
+        <!--
+            如果使用maven默认的镜像仓库地址可能存在报错问题，则使用下方的aliyun镜像地址仓库
+            <mirror>
+              <id>nexus-aliyun</id>
+              <mirrorOf>central</mirrorOf>
+              <name>Nexus aliyun</name>
+              <url>http://maven.aliyun.com/repository/public</url>
+            </mirror>
+        -->
 
     </dependencies>
 

@@ -45,6 +45,11 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
         <!-- 引入SpringAI的坐标 -->
         <dependency>
             <groupId>io.springboot.ai</groupId>

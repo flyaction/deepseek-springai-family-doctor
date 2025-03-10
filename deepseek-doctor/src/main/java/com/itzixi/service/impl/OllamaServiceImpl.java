@@ -1,4 +1,4 @@
-package com.itzixi.controller;
+package com.itzixi.service.impl;
 
 import com.itzixi.service.OllamaService;
 import jakarta.annotation.Resource;
@@ -7,10 +7,7 @@ import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.ollama.OllamaChatClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -18,33 +15,30 @@ import java.util.stream.Collectors;
 
 /**
  * @author: action
- * @create: 2025/3/7 08:15
+ * @create: 2025/3/10 11:15
  **/
+@Service
 @Slf4j
-@RestController
-@RequestMapping("ollama")
-public class OllamaController {
+public class OllamaServiceImpl implements OllamaService {
 
     @Resource
     private OllamaChatClient ollamaChatClient;
-    @Resource
-    private OllamaService ollamaService;
 
-    @GetMapping("ai/chat")
-    public Object aiOllamaChat(@RequestParam String msg){
+    @Override
+    public Object aiOllamaChat(String msg) {
         //同步调用deepseek，当前页面会卡住，直到获得所有的数据才会返回给页面
         return ollamaChatClient.call(msg);
     }
 
-    @GetMapping("ai/stream1")
-    public Flux<ChatResponse> aiOllamaStream1(@RequestParam String msg){
+    @Override
+    public Flux<ChatResponse> aiOllamaStream1(String msg) {
         Prompt prompt = new Prompt(new UserMessage(msg));
         Flux<ChatResponse> streamResponse = ollamaChatClient.stream(prompt);
         return streamResponse;
     }
 
-    @GetMapping("ai/stream2")
-    public List<String> aiOllamaStream2(@RequestParam String msg){
+    @Override
+    public List<String> aiOllamaStream2(String msg) {
         Prompt prompt = new Prompt(new UserMessage(msg));
         Flux<ChatResponse> streamResponse = ollamaChatClient.stream(prompt);
         List<String> list = streamResponse.toStream().map(chatResponse -> {
@@ -52,23 +46,6 @@ public class OllamaController {
             log.info(content);
             return content;
         }).collect(Collectors.toList());
-
         return list;
     }
-
-    @GetMapping("ai/v2/chat")
-    public Object aiOllamaChatV2(@RequestParam String msg){
-        return ollamaService.aiOllamaChat(msg);
-    }
-
-    @GetMapping("ai/v2/stream1")
-    public Flux<ChatResponse> aiOllamaStream1V2(@RequestParam String msg){
-        return ollamaService.aiOllamaStream1(msg);
-    }
-
-    @GetMapping("ai/v2/stream2")
-    public List<String> aiOllamaStream2V2(@RequestParam String msg){
-        return ollamaService.aiOllamaStream2(msg);
-    }
-
 }

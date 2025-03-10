@@ -1,5 +1,6 @@
 package com.itzixi.controller;
 
+import com.itzixi.utils.SSEMsgType;
 import com.itzixi.utils.SSEServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -25,6 +26,18 @@ public class SSEController {
     @GetMapping(path = "connect",produces = {MediaType.TEXT_EVENT_STREAM_VALUE})
     public SseEmitter connect(@RequestParam String userId){
         return SSEServer.connect(userId);
+    }
+
+    /**
+     * 发送单条消息给SSE的客户端
+     * @param userId
+     * @param message
+     * @return Object
+     */
+    @GetMapping("sendMessage")
+    public Object sendMessage(@RequestParam String userId, @RequestParam String message) {
+        SSEServer.sendMessage(userId, message, SSEMsgType.MESSAGE);
+        return "OK";
     }
 
 

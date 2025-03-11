@@ -1,6 +1,8 @@
 package com.itzixi.service.impl;
 
 import com.itzixi.service.OllamaService;
+import com.itzixi.utils.SSEMsgType;
+import com.itzixi.utils.SSEServer;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.ChatResponse;
@@ -47,5 +49,23 @@ public class OllamaServiceImpl implements OllamaService {
             return content;
         }).collect(Collectors.toList());
         return list;
+    }
+
+    @Override
+    public void doDoctorStreamV3(String userName, String message) {
+
+        Prompt prompt = new Prompt(new UserMessage(message));
+        Flux<ChatResponse> streamResponse = ollamaChatClient.stream(prompt);
+        List<String> list = streamResponse.toStream().map(chatResponse -> {
+            String content = chatResponse.getResult().getOutput().getContent();
+
+            SSEServer.sendMessage(userName, content, SSEMsgType.ADD);
+
+            log.info(content);
+            return content;
+        }).collect(Collectors.toList());
+
+        SSEServer.sendMessage(userName, "GG", SSEMsgType.FINISH);
+
     }
 }

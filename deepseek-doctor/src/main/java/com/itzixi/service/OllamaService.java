@@ -14,4 +14,5 @@ public interface OllamaService {
     public Object aiOllamaChat(String msg);
     public Flux<ChatResponse> aiOllamaStream1(String msg);
     public List<String> aiOllamaStream2(String msg);
+    public void doDoctorStreamV3(String userName, String message);
 }

@@ -1,5 +1,6 @@
 package com.itzixi.controller;
 
+import com.itzixi.bean.ChatEntity;
 import com.itzixi.service.OllamaService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -7,10 +8,7 @@ import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.ollama.OllamaChatClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -70,5 +68,21 @@ public class OllamaController {
     public List<String> aiOllamaStream2V2(@RequestParam String msg){
         return ollamaService.aiOllamaStream2(msg);
     }
+
+
+    @PostMapping("/ai/v3/doctor/stream")
+    public void aiOllamaV3DoctorStream(@RequestBody ChatEntity chatEntity) {
+
+        log.info(chatEntity.toString());
+        String userName = chatEntity.getCurrentUserName();
+        String message = chatEntity.getMessage();
+
+        ollamaService.doDoctorStreamV3(userName, message);
+    }
+
+//    @GetMapping("/getRecords")
+//    public Object aiOllamaV3DoctorStream(@RequestParam String who) {
+//        return chatRecordService.getChatRecordList(who);
+//    }
 
 }

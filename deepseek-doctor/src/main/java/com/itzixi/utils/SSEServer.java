@@ -163,4 +163,13 @@ public class SSEServer {
         log.info("SSE连接被移除，移除的用户ID为: {}", userId);
         onlineCounts.getAndDecrement();
     }
+
+    /**
+     * 获得当前所有的会话总连接数（在线人数）
+     * @param
+     * @return int
+     */
+    public static int getOnlineCounts() {
+        return onlineCounts.intValue();
+    }
 }

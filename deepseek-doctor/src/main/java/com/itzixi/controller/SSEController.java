@@ -78,4 +78,14 @@ public class SSEController {
         return "OK";
     }
 
+    /**
+     * 获得当前所有的会话总连接数（在线人数）
+     * @param
+     * @return Object
+     */
+    @GetMapping("getOnlineCounts")
+    public Object getOnlineCounts() {
+        return SSEServer.getOnlineCounts();
+    }
+
 }

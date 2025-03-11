@@ -1,6 +1,7 @@
 package com.itzixi.controller;
 
 import com.itzixi.bean.ChatEntity;
+import com.itzixi.service.ChatRecordService;
 import com.itzixi.service.OllamaService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,8 @@ public class OllamaController {
     private OllamaChatClient ollamaChatClient;
     @Resource
     private OllamaService ollamaService;
+    @Resource
+    private ChatRecordService chatRecordService;
 
     @GetMapping("ai/chat")
     public Object aiOllamaChat(@RequestParam String msg){
@@ -80,9 +83,9 @@ public class OllamaController {
         ollamaService.doDoctorStreamV3(userName, message);
     }
 
-//    @GetMapping("/getRecords")
-//    public Object aiOllamaV3DoctorStream(@RequestParam String who) {
-//        return chatRecordService.getChatRecordList(who);
-//    }
+    @GetMapping("/getRecords")
+    public Object aiOllamaV3DoctorStream(@RequestParam String who) {
+        return chatRecordService.getChatRecordList(who);
+    }
 
 }

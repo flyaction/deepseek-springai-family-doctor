@@ -1,5 +1,6 @@
 package com.itzixi.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.itzixi.bean.ChatRecord;
 import com.itzixi.mapper.ChatRecordMapper;
 import com.itzixi.service.ChatRecordService;
@@ -35,8 +36,11 @@ public class ChatRecordServiceImpl implements ChatRecordService {
     }
 
     @Override
-    public List<ChatRecord> getChatRecordList(String userName) {
+    public List<ChatRecord> getChatRecordList(String who) {
 
-        return null;
+        QueryWrapper<ChatRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("family_member", who);
+
+        return chatRecordMapper.selectList(queryWrapper);
     }
 }

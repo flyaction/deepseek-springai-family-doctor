@@ -1,6 +1,8 @@
 package com.itzixi.service.impl;
 
+import com.itzixi.service.ChatRecordService;
 import com.itzixi.service.OllamaService;
+import com.itzixi.utils.ChatTypeEnum;
 import com.itzixi.utils.SSEMsgType;
 import com.itzixi.utils.SSEServer;
 import jakarta.annotation.Resource;
@@ -25,6 +27,9 @@ public class OllamaServiceImpl implements OllamaService {
 
     @Resource
     private OllamaChatClient ollamaChatClient;
+
+    @Resource
+    private ChatRecordService chatRecordService;
 
     @Override
     public Object aiOllamaChat(String msg) {
@@ -54,6 +59,9 @@ public class OllamaServiceImpl implements OllamaService {
     @Override
     public void doDoctorStreamV3(String userName, String message) {
 
+        // 保存用户发送的记录到数据库
+        chatRecordService.saveChatRecord(userName,message, ChatTypeEnum.USER);
+
         Prompt prompt = new Prompt(new UserMessage(message));
         Flux<ChatResponse> streamResponse = ollamaChatClient.stream(prompt);
         List<String> list = streamResponse.toStream().map(chatResponse -> {
@@ -66,6 +74,13 @@ public class OllamaServiceImpl implements OllamaService {
         }).collect(Collectors.toList());
 
         SSEServer.sendMessage(userName, "GG", SSEMsgType.FINISH);
+
+        // 保存AI回复的记录到数据库
+        String htmlResult = "";
+        for (String s : list) {
+            htmlResult += s;
+        }
+        chatRecordService.saveChatRecord(userName, htmlResult, ChatTypeEnum.BOT);
 
     }
 }

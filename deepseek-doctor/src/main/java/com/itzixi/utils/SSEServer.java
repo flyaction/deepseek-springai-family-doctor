@@ -64,6 +64,20 @@ public class SSEServer {
     }
 
     /**
+     * 发送消息给所有人
+     * @param message
+     */
+    public static void sendMessageToAllUsers(String message) {
+        if (CollectionUtils.isEmpty(sseClients)) {
+            return;
+        }
+        
+        sseClients.forEach((userId, sseEmitter) -> {
+            sendEmitterMessage(sseEmitter, userId, message, SSEMsgType.MESSAGE);
+        });
+    }
+
+    /**
      * 使用SseEmitter推送消息
      * @param sseEmitter
      * @param userId

@@ -40,6 +40,16 @@ public class SSEController {
         return "OK";
     }
 
+    /**
+     * 发送消息给所有客户端用户
+     * @param message
+     * @return Object
+     */
+    @GetMapping("sendMessageAll")
+    public Object sendMessageAll(@RequestParam String message) {
+        SSEServer.sendMessageToAllUsers(message);
+        return "OK";
+    }
 
 
 }

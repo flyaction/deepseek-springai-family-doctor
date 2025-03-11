@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家庭医生</title>
+    <link rel="stylesheet" href="../../css/doctor/doctor.css">
+</head>
+<body>
+    <div class="chat-container" id="doctorPage">
+        <div class="chat-header">
+            家庭医生 <block v-if="currentUserName != null">正在和<strong style="color: rgb(166, 237, 217);">{{currentUserName}}</strong>沟通中</block>
+            <div class="user-input-container" v-if="currentUserName == null">
+                <input type="text" id="user-name" placeholder="输入用户名" class="user-input-field"/>
+                <button class="submit-button" @click="submitUserName()">建立连接</button>
+            </div>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            
+            <block v-for="(item, index) in chatList">
+                <div class="message user" v-if="item.chatType === 'user'">
+                    <div class="text">{{ item.content }}</div>
+                    <div class="user-avatar">风</div>
+                </div>
+                <div class="message bot" v-else>
+                    <div class="avatar">医</div>
+                    <div class="text" v-html="item.content"></div>
+                </div>
+            </block>
+
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" value="" placeholder="请输入内容..." @keydown="handleKeyDown(event)">
+            <button id="btn-chat" @click="doChat()">发送</button>
+        </div>
+    </div>
+
+</body>
+
+<script src="../../libs/vue.min.js"></script>
+<script src="../../libs/axios.min.js"></script>
+<script src="../../libs/jquery-3.4.1.min.js"></script>
+<script src="../../libs/js.cookie.min.js"></script>
+<script src="../../js/app.js"></script>
+
+<script src="../../libs/marked.min.js"></script>
+
+<script src="../../js/cookieUtils.js"></script>
+<script src="../../js/request.js"></script>
+<script src="../../js/apis/admin/doctorApi.js"></script>
+
+<script>
+
+	var doctorPage = new Vue({
+		el: "#doctorPage",
+		components: {
+			// 'my-component': httpVueLoader('my-component.vue')
+        },
+		data() {
+			return {
+				botMsgId: null,
+                currentUserName: null,
+                chatList: [],
+			}
+		},
+		created() { 
+			var me = this;
+		},
+		mounted() {
+            this.scrollToBottom();
+        },
+		watch: {
+		},
+		methods: {
+            initSSE(userName) {
+                var me = this;
+
+                let source = null;
+                if (window.EventSource) {
+                    // 建立连接
+                    source = new EventSource('http://10.0.0.3:8080/sse/connect?userId=' + userName);
+                    console.log("连接用户=" + userName);
+                    me.currentUserName = userName;
+                    
+                    source.addEventListener('open', function (e) {
+                        console.log("建立连接。。。");
+                    }, false);
+
+                    source.addEventListener('add', function (e) {
+
+                        console.log("add事件...");
+                        console.log(e.data);
+                        var receiveMsg = e.data;
+
+                        var botMsgId = me.botMsgId;
+                        if (botMsgId == null || botMsgId == '') {
+                            botMsgId = me.generateRandomId(12);
+                            me.botMsgId = botMsgId;
+                            console.log("botMsgId = " + botMsgId);
+
+                            // 为空，创建新对象
+                            var newBotContent = {
+                                id: "temp",
+                                content: receiveMsg,
+                                // time: '2023-05-01 12:00:00',
+                                userName: '家庭医生',
+                                chatType: 'bot',
+                                botMsgId: botMsgId,
+                            };
+                            me.chatList.push(newBotContent);
+
+                        } else {
+                            console.log("botMsgId 不为空...");
+                            console.log("botMsgId = " + botMsgId);
+
+                            // 不为空，找到对应的聊天记录流式插入数据
+                            for (var i = 0; i < me.chatList.length; i++) {
+                                var chatItem = me.chatList[i];
+                                if (chatItem.botMsgId == botMsgId) {
+                                    // 找到对应的聊天记录流式插入数据
+                                    chatItem.content += receiveMsg;
+                                }
+                            }
+                        }
+
+                        me.scrollToBottom();
+                    });
+
+                    source.addEventListener('finish', function (e) {
+                        console.log("finish事件...");
+                        me.botMsgId = null;
+                        me.scrollToBottom();
+                    });
+
+                    source.addEventListener('error', function (e) {
+                        console.log("error事件...");
+                        console.log("e.readyState: " + source.readyState);
+
+                        if (e.readyState === EventSource.CLOSED) {
+                            console.log('connection is closed');
+                        } else {
+                            console.log("Error occured", event);
+                        }
+                        // close方法用于关闭连接
+                        source.close();
+                    });
+
+                    source.addEventListener("customEvent", function(e) {
+                        console.log(e.lastEventId);
+                        console.log(e.data);
+                    }, false);
+                } else {
+                    console.log("浏览器不支持SSE");
+                }
+            },
+
+            submitUserName() {
+                const userName = document.getElementById('user-name').value;
+                if (userName.trim() === '') {
+                    alert('请输入沟通用户名');
+                    return;
+                }
+                // alert('用户名: ' + userName);
+                // 在这里可以添加更多的逻辑来处理用户名
+                // this.currentUserName = userName;
+                this.initSSE(userName);
+
+                this.getChatRecords(userName);
+
+                setTimeout(() => {
+                    this.scrollToBottom();
+                }, 300);
+            },
+
+            getChatRecords(who) {
+                var me = this;
+                doctorApi.getRecords(who).then((result) => {
+                    console.log(result);
+                    this.chatList = result;
+
+                    me.scrollToBottom();
+                }).catch((err) => {
+                    
+                });;
+            },
+
+            handleKeyDown(event) {
+                if (event.key === 'Enter') {    
+                    this.doChat();
+                }
+            },
+
+            doChat() {
+                var currentUserName = this.currentUserName;
+
+                const userInput = document.getElementById('user-input').value;
+                var pendingMsg = userInput.trim();
+                if (pendingMsg === '') return;
+
+                if (currentUserName == null || currentUserName == '') {
+                    alert('请输入沟通用户名');
+                    return;
+                }
+
+                // 发送消息到后端
+                var singleChat = {
+                    currentUserName: currentUserName,
+                    message: pendingMsg
+                };
+
+                doctorApi.doChat(singleChat);
+
+                var newUserContent = {
+                        content: pendingMsg,
+                        userName: currentUserName,
+                        chatType: 'user',
+                    }
+                this.chatList.push(newUserContent);
+
+                document.getElementById('user-input').value = '';
+            },
+
+            generateRandomId(length) {
+                const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let result = '';
+                const charactersLength = characters.length;
+                for (let i = 0; i < length; i++) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                }
+                return result;
+            },
+
+            scrollToBottom() {
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+	});
+
+</script>

@@ -71,7 +71,7 @@ public class SSEServer {
         if (CollectionUtils.isEmpty(sseClients)) {
             return;
         }
-        
+
         sseClients.forEach((userId, sseEmitter) -> {
             sendEmitterMessage(sseEmitter, userId, message, SSEMsgType.MESSAGE);
         });
@@ -92,6 +92,27 @@ public class SSEServer {
         } catch (IOException e) {
             log.error("用户[{}]的消息推送发生异常！", userId);
             removeConnection(userId);
+        }
+
+    }
+
+    /**
+     * 主动切断，停止sse服务和客户端的连接
+     * @param userId
+     */
+    public static void stopServer(String userId) {
+        if (CollectionUtils.isEmpty(sseClients)) {
+            return;
+        }
+
+        SseEmitter sseEmitter = sseClients.get(userId);
+        if (sseEmitter != null) {
+            // complete 表示执行完毕，断开连接
+            sseEmitter.complete();
+            removeConnection(userId);
+            log.info("连接关闭成功，被关闭的用户为 {}", userId);
+        } else {
+            log.warn("当前连接无需关闭，请不要重复操作");
         }
 
     }

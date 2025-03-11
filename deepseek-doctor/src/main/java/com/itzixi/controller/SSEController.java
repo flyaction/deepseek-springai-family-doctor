@@ -51,5 +51,31 @@ public class SSEController {
         return "OK";
     }
 
+    /**
+     * add事件流式输出
+     * @param userId
+     * @param message
+     * @return Object
+     */
+    @GetMapping("sendMessageAdd")
+    public Object sendMessageAdd(@RequestParam String userId,
+                                 @RequestParam String message) throws Exception {
+        for (int i = 0 ; i < 10 ; i ++) {
+            Thread.sleep(200);
+            SSEServer.sendMessage(userId, message + "-" + i, SSEMsgType.ADD);
+        }
+        return "OK";
+    }
+
+    /**
+     * 停止sse
+     * @param userId
+     * @return Object
+     */
+    @GetMapping("stop")
+    public Object stopServer(@RequestParam String userId)  {
+        SSEServer.stopServer(userId);
+        return "OK";
+    }
 
 }

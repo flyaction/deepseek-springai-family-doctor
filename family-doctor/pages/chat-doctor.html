@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="chat-messages" id="chat-messages">
-            
+
             <block v-for="(item, index) in chatList">
                 <div class="message user" v-if="item.chatType === 'user'">
                     <div class="text">{{ item.content }}</div>
@@ -63,7 +63,7 @@
                 chatList: [],
 			}
 		},
-		created() { 
+		created() {
 			var me = this;
 		},
 		mounted() {
@@ -78,10 +78,10 @@
                 let source = null;
                 if (window.EventSource) {
                     // 建立连接
-                    source = new EventSource('http://10.0.0.3:8080/sse/connect?userId=' + userName);
+                    source = new EventSource('http://192.168.31.132:8080/sse/connect?userId=' + userName);
                     console.log("连接用户=" + userName);
                     me.currentUserName = userName;
-                    
+
                     source.addEventListener('open', function (e) {
                         console.log("建立连接。。。");
                     }, false);
@@ -180,12 +180,12 @@
 
                     me.scrollToBottom();
                 }).catch((err) => {
-                    
+
                 });;
             },
 
             handleKeyDown(event) {
-                if (event.key === 'Enter') {    
+                if (event.key === 'Enter') {
                     this.doChat();
                 }
             },
